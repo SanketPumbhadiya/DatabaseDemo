@@ -67,16 +67,20 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String s = (String) parent.getItemAtPosition(position);
                 String[] splitt = s.split(" ");
-                String fn = splitt[0];
-                String ln = splitt[1];
-
-                firstname.setText(fn);
-                lastname.setText(ln);
+                if (splitt.length >= 1) {
+                    String fn = splitt[0];
+                    firstname.setText(fn);
+                }
+                if (splitt.length >= 2) {
+                    String ln = splitt[1];
+                    lastname.setText(ln);
+                }
                 submitbtn.setText("Update");
             }
         });
 
         //Delete Data from listview..
+
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -86,18 +90,19 @@ public class MainActivity extends AppCompatActivity {
                 db.Deletedata(s);
                 adapter.remove(fn);
                 adapter.notifyDataSetChanged();
-
+                if (splitt.length >= 1) {
+                    String sp = splitt[0];
+                    firstname.setText(sp);
+                }
                 Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
         updatelistview();
     }
-
-
     //Display data from listview..
     public void updatelistview() {
-
+        adapter.clear();
         ArrayList<String> data = db.Displaydata();
         adapter.addAll(data);
         adapter.notifyDataSetChanged();
