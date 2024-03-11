@@ -42,21 +42,25 @@ public class MainActivity extends AppCompatActivity {
                 String fn = firstname.getText().toString();
                 String ln = lastname.getText().toString();
 
-                if (submitbtn.getText() == "Update") {
-                    //Update Data from listview..
-                    db.UpdateData(fn, ln);
-                    Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
-                    firstname.setText("");
-                    lastname.setText("");
-                    submitbtn.setText("Submit");
-                    updatelistview();
-                } else {
-                    //Insert Data from listview..
-                    db.Insertdata(fn, ln);
-                    Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
-                    firstname.setText("");
-                    lastname.setText("");
-                    updatelistview();
+                    if (submitbtn.getText() == "Update") {
+                        //Update Data from listview..
+                        db.UpdateData(fn, ln);
+                        Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
+                        firstname.setText("");
+                        lastname.setText("");
+                        submitbtn.setText("Submit");
+                        updatelistview();
+                    } else {
+                        if (firstname.length() ==0 || lastname.length() == 0) {
+                            Toast.makeText(MainActivity.this, "This fill is required", Toast.LENGTH_SHORT).show();
+                        } else {
+                        //Insert Data from listview..
+                        db.Insertdata(fn, ln);
+                        Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
+                        firstname.setText("");
+                        lastname.setText("");
+                        updatelistview();
+                    }
                 }
             }
         });
@@ -86,13 +90,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 String fn = (String) adapter.getItem(position);
                 String[] splitt = fn.split(" ");
-                String s = splitt[0];
-                db.Deletedata(s);
+
                 adapter.remove(fn);
                 adapter.notifyDataSetChanged();
                 if (splitt.length >= 1) {
                     String sp = splitt[0];
-                    firstname.setText(sp);
+                    db.Deletedata(sp);
                 }
                 Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
                 return true;
@@ -100,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         });
         updatelistview();
     }
+
     //Display data from listview..
     public void updatelistview() {
         adapter.clear();
