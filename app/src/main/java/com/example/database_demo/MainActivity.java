@@ -36,10 +36,6 @@ public class MainActivity extends AppCompatActivity {
         listView = findViewById(R.id.listview);
         m1 = new ArrayList<>();
 
-//        m1.add(new model("Sanket", "pumbhadiya"));
-//        m1.add(new model("dhruv", "parmar"));
-//        m1.add(new model("jil", "patel"));
-
         adapter = new customlistadapter(this, R.layout.customlistview, m1);
         listView.setAdapter(adapter);
 
@@ -64,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                             updatelistview();
                             Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
                         }
-
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -86,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
                 editimageview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
+                        //update data from database..
                         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
                         LayoutInflater inflater = getLayoutInflater();
                         v = inflater.inflate(R.layout.pupupaddbtn, null);
@@ -115,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+                //Delete data from database..
                 ImageView deleteimageview = view.findViewById(R.id.iv_delete);
                 deleteimageview.setOnClickListener(new View.OnClickListener() {
                     @Override
