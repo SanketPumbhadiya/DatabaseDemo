@@ -1,25 +1,29 @@
 package com.example.database_demo;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    EditText firstname, lastname;
-    Button submitbtn;
-    ArrayAdapter adapter;
+
+    Button addbtn;
+    ArrayList<model> m1;
+    customlistadapter adapter;
 
     ListView listView;
-
     SqlDb db = new SqlDb(this);
 
 
@@ -28,87 +32,126 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        firstname = findViewById(R.id.edtfirstname);
-        lastname = findViewById(R.id.edtlastname);
-        submitbtn = findViewById(R.id.submitbtn);
+        addbtn = findViewById(R.id.Addbtn);
         listView = findViewById(R.id.listview);
+        m1 = new ArrayList<>();
 
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+//        m1.add(new model("Sanket", "pumbhadiya"));
+//        m1.add(new model("dhruv", "parmar"));
+//        m1.add(new model("jil", "patel"));
+
+        adapter = new customlistadapter(this, R.layout.customlistview, m1);
         listView.setAdapter(adapter);
 
-        submitbtn.setOnClickListener(new View.OnClickListener() {
+        addbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String fn = firstname.getText().toString();
-                String ln = lastname.getText().toString();
-
-                    if (submitbtn.getText() == "Update") {
-                        //Update Data from listview..
-                        db.UpdateData(fn, ln);
-                        Toast.makeText(MainActivity.this, "Updated", Toast.LENGTH_SHORT).show();
-                        firstname.setText("");
-                        lastname.setText("");
-                        submitbtn.setText("Submit");
-                        updatelistview();
-                    } else {
-                        if (firstname.length() ==0 || lastname.length() == 0) {
-                            Toast.makeText(MainActivity.this, "This fill is required", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
+                LayoutInflater inflater = getLayoutInflater();
+                v = inflater.inflate(R.layout.pupupaddbtn, null);
+                final EditText firstname = v.findViewById(R.id.edtfirstname);
+                final EditText lastname = v.findViewById(R.id.edtlastname);
+                builder.setView(v);
+                builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String fn = firstname.getText().toString();
+                        String ln = lastname.getText().toString();
+                        if (fn.isEmpty() || ln.isEmpty()) {
+                            Toast.makeText(MainActivity.this, "Please Enter details..", Toast.LENGTH_SHORT).show();
                         } else {
-                        //Insert Data from listview..
-                        db.Insertdata(fn, ln);
-                        Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
-                        firstname.setText("");
-                        lastname.setText("");
-                        updatelistview();
+                            db.Insertdata(fn, ln);
+                            updatelistview();
+                            Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
+                        }
+
                     }
-                }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create();
+                builder.show();
             }
         });
 
-        //Splitting data from listview..
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s = (String) parent.getItemAtPosition(position);
-                String[] splitt = s.split(" ");
-                if (splitt.length >= 1) {
-                    String fn = splitt[0];
-                    firstname.setText(fn);
-                }
-                if (splitt.length >= 2) {
-                    String ln = splitt[1];
-                    lastname.setText(ln);
-                }
-                submitbtn.setText("Update");
-            }
-        });
+                ImageView editimageview = view.findViewById(R.id.iv_edit);
 
-        //Delete Data from listview..
+                editimageview.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
+                        LayoutInflater inflater = getLayoutInflater();
+                        v = inflater.inflate(R.layout.pupupaddbtn, null);
+                        final EditText firstname = v.findViewById(R.id.edtfirstname);
+                        final EditText lastname = v.findViewById(R.id.edtlastname);
+                        builder.setView(v);
+                        model Model = m1.get(position);
+                        firstname.setText(Model.getFname());
+                        lastname.setText(Model.getLname());
+                        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String fn = firstname.getText().toString();
+                                String ln = lastname.getText().toString();
+                                db.UpdateData(fn, ln);
+                                updatelistview();
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.create();
+                        builder.show();
+                    }
+                });
 
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                String fn = (String) adapter.getItem(position);
-                String[] splitt = fn.split(" ");
+                ImageView deleteimageview = view.findViewById(R.id.iv_delete);
+                deleteimageview.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
+                        builder.setTitle("Are you sure you want to delete it..?");
+                        model Model = m1.get(position);
+                        builder.setMessage(Model.getFname() + " " + Model.getLname());
+                        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String fn = Model.getFname();
+                                db.Deletedata(fn);
+                                updatelistview();
+                            }
+                        });
 
-                adapter.remove(fn);
-                adapter.notifyDataSetChanged();
-                if (splitt.length >= 1) {
-                    String sp = splitt[0];
-                    db.Deletedata(sp);
-                }
-                Toast.makeText(MainActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
-                return true;
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.create();
+                        builder.show();
+                    }
+                });
             }
         });
         updatelistview();
     }
 
-    //Display data from listview..
     public void updatelistview() {
-        adapter.clear();
-        ArrayList<String> data = db.Displaydata();
-        adapter.addAll(data);
+        m1.clear();
+        ArrayList<model> data = db.Displaydata();
+        m1.addAll(data);
         adapter.notifyDataSetChanged();
+
     }
 }

@@ -17,7 +17,7 @@ public class SqlDb extends SQLiteOpenHelper {
     private static final String Lastname = "lastname";
 
     public SqlDb(@Nullable Context context) {
-        super(context, "listDb", null, 1);
+        super(context, "listDb", null, 2);
     }
 
     @Override
@@ -43,16 +43,16 @@ public class SqlDb extends SQLiteOpenHelper {
         sdb.insert(Tablename, null, cv);
     }
 
-    public ArrayList<String> Displaydata() {
-        ArrayList<String> data = new ArrayList<>();
+    public ArrayList<model> Displaydata() {
+        ArrayList<model> data = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {Firstname, Lastname};
+        String[] columns = { Firstname, Lastname};
         Cursor cursor = db.query(Tablename, columns, null, null, null, null, null);
 
         while (cursor.moveToNext()) {
             String fn = cursor.getString(cursor.getColumnIndex(Firstname));
             String ln = cursor.getString(cursor.getColumnIndex(Lastname));
-            data.add(fn + " " + ln);
+            data.add(new model(fn , ln));
         }
         cursor.close();
         db.close();
@@ -62,7 +62,7 @@ public class SqlDb extends SQLiteOpenHelper {
 
     public void Deletedata(String firstname) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(Tablename,"firstname = ?",new String[]{firstname});
+        db.delete(Tablename, "firstname = ?", new String[]{firstname});
         db.close();
     }
 
