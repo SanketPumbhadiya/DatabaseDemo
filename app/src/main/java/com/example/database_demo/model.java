@@ -1,12 +1,13 @@
 package com.example.database_demo;
 
 public class model{
-    String fname,lname;
+    String fname,lname,gender;
 
 
-    public model(String fname,String lname){
+    public model(String fname,String lname,String gender){
         this.fname = fname;
         this.lname = lname;
+        this.gender = gender;
     }
     public String getFname() {
         return fname;
@@ -15,5 +16,7 @@ public class model{
         return lname;
     }
 
-
+    public String getGender() {
+        return gender;
+    }
 }

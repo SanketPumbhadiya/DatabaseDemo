@@ -4,15 +4,22 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     customlistadapter adapter;
 
     ListView listView;
+    EditText SearcheditText;
     SqlDb db = new SqlDb(this);
 
 
@@ -34,9 +42,21 @@ public class MainActivity extends AppCompatActivity {
 
         addbtn = findViewById(R.id.Addbtn);
         listView = findViewById(R.id.listview);
+        SearcheditText = findViewById(R.id.search_edt);
+
+       SearcheditText.addTextChangedListener(new TextWatcher() {
+           @Override
+           public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+           @Override
+           public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+           }
+           @Override
+           public void afterTextChanged(Editable s) {}
+       });
         m1 = new ArrayList<>();
 
-        adapter = new customlistadapter(this, R.layout.customlistview, m1);
+        adapter = new customlistadapter(this,R.layout.customlistview, m1);
         listView.setAdapter(adapter);
 
         addbtn.setOnClickListener(new View.OnClickListener() {
@@ -47,16 +67,24 @@ public class MainActivity extends AppCompatActivity {
                 v = inflater.inflate(R.layout.pupupaddbtn, null);
                 final EditText firstname = v.findViewById(R.id.edtfirstname);
                 final EditText lastname = v.findViewById(R.id.edtlastname);
+                final RadioButton rbmale = v.findViewById(R.id.rbmale);
+//                final RadioButton rbf = v.findViewById(R.id.rbfemale);
                 builder.setView(v);
                 builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String fn = firstname.getText().toString();
                         String ln = lastname.getText().toString();
+                        String s;
+                        if (rbmale.isChecked()) {
+                            s = "male";
+                        } else {
+                            s = "female";
+                        }
                         if (fn.isEmpty() || ln.isEmpty()) {
                             Toast.makeText(MainActivity.this, "Please Enter details..", Toast.LENGTH_SHORT).show();
                         } else {
-                            db.Insertdata(fn, ln);
+                            db.Insertdata(fn, ln, s);
                             updatelistview();
                             Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
                         }
@@ -88,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                         v = inflater.inflate(R.layout.pupupaddbtn, null);
                         final EditText firstname = v.findViewById(R.id.edtfirstname);
                         final EditText lastname = v.findViewById(R.id.edtlastname);
+                        final RadioButton rbmale = v.findViewById(R.id.rbmale);
                         builder.setView(v);
                         model Model = m1.get(position);
                         firstname.setText(Model.getFname());
@@ -97,7 +126,11 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 String fn = firstname.getText().toString();
                                 String ln = lastname.getText().toString();
-                                db.UpdateData(fn, ln);
+                                String name;
+                                if (rbmale.isChecked()) {
+                                    name = "male";
+                                } else name = "female";
+                                db.UpdateData(fn, ln, name);
                                 updatelistview();
                             }
                         });
@@ -129,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
                                 updatelistview();
                             }
                         });
-
                         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -145,11 +177,13 @@ public class MainActivity extends AppCompatActivity {
         updatelistview();
     }
 
+
+
+
     public void updatelistview() {
         m1.clear();
         ArrayList<model> data = db.Displaydata();
         m1.addAll(data);
         adapter.notifyDataSetChanged();
-
     }
 }
