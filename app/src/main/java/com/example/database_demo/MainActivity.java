@@ -4,22 +4,18 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -27,11 +23,11 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     Button addbtn;
-    ArrayList<model> m1;
-    customlistadapter adapter;
+    ArrayList<Model> m1;
+    CustomListAdapter adapter;
 
     ListView listView;
-    EditText SearcheditText;
+    EditText SearcheditTextfname, SearcheditTextlname, SearcheditTextgender;
     SqlDb db = new SqlDb(this);
 
 
@@ -42,21 +38,72 @@ public class MainActivity extends AppCompatActivity {
 
         addbtn = findViewById(R.id.Addbtn);
         listView = findViewById(R.id.listview);
-        SearcheditText = findViewById(R.id.search_edt);
+        SearcheditTextfname = findViewById(R.id.search_edtfname);
+        SearcheditTextlname = findViewById(R.id.search_edtlname);
+        SearcheditTextgender = findViewById(R.id.search_edtgender);
 
-       SearcheditText.addTextChangedListener(new TextWatcher() {
-           @Override
-           public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-           @Override
-           public void onTextChanged(CharSequence s, int start, int before, int count) {
+        SearcheditTextfname.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
                 adapter.getFilter().filter(s);
-           }
-           @Override
-           public void afterTextChanged(Editable s) {}
-       });
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (SearcheditTextlname.length() == 0 && SearcheditTextgender.length() == 0) {
+                    if (s.length() == 0) {
+                        updatelistview();
+                    }
+                }
+            }
+        });
+
+        SearcheditTextlname.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (SearcheditTextfname.length() == 0 && SearcheditTextgender.length() == 0) {
+                    if (s.length() == 0) {
+                        updatelistview();
+                    }
+                }
+            }
+        });
+
+        SearcheditTextgender.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (SearcheditTextfname.length() == 0 && SearcheditTextlname.length() == 0) {
+                    if (s.length() == 0) {
+                        updatelistview();
+                    }
+                }
+            }
+        });
         m1 = new ArrayList<>();
 
-        adapter = new customlistadapter(this,R.layout.customlistview, m1);
+        adapter = new CustomListAdapter(this, m1);
         listView.setAdapter(adapter);
 
         addbtn.setOnClickListener(new View.OnClickListener() {
@@ -64,11 +111,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
                 LayoutInflater inflater = getLayoutInflater();
-                v = inflater.inflate(R.layout.pupupaddbtn, null);
+                v = inflater.inflate(R.layout.activity_pupupaddbtn, null);
                 final EditText firstname = v.findViewById(R.id.edtfirstname);
                 final EditText lastname = v.findViewById(R.id.edtlastname);
                 final RadioButton rbmale = v.findViewById(R.id.rbmale);
-//                final RadioButton rbf = v.findViewById(R.id.rbfemale);
                 builder.setView(v);
                 builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
@@ -113,12 +159,12 @@ public class MainActivity extends AppCompatActivity {
                         //update data from database..
                         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
                         LayoutInflater inflater = getLayoutInflater();
-                        v = inflater.inflate(R.layout.pupupaddbtn, null);
+                        v = inflater.inflate(R.layout.activity_pupupaddbtn, null);
                         final EditText firstname = v.findViewById(R.id.edtfirstname);
                         final EditText lastname = v.findViewById(R.id.edtlastname);
                         final RadioButton rbmale = v.findViewById(R.id.rbmale);
                         builder.setView(v);
-                        model Model = m1.get(position);
+                        Model Model = m1.get(position);
                         firstname.setText(Model.getFname());
                         lastname.setText(Model.getLname());
                         builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
@@ -152,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
                         builder.setTitle("Are you sure you want to delete it..?");
-                        model Model = m1.get(position);
+                        Model Model = m1.get(position);
                         builder.setMessage(Model.getFname() + " " + Model.getLname());
                         builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                             @Override
@@ -178,11 +224,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     public void updatelistview() {
         m1.clear();
-        ArrayList<model> data = db.Displaydata();
+        ArrayList<Model> data = db.Displaydata();
         m1.addAll(data);
         adapter.notifyDataSetChanged();
     }

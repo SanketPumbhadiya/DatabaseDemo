@@ -58,8 +58,8 @@ public class SqlDb extends SQLiteOpenHelper {
         sdb.insert(Tablename, null, cv);
     }
 
-    public ArrayList<model> Displaydata() {
-        ArrayList<model> data = new ArrayList<>();
+    public ArrayList<Model> Displaydata() {
+        ArrayList<Model> data = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {Firstname, Lastname, Gender};
         Cursor cursor = db.query(Tablename, columns, null, null, null, null, null);
@@ -68,7 +68,7 @@ public class SqlDb extends SQLiteOpenHelper {
             String fn = cursor.getString(cursor.getColumnIndex(Firstname));
             String ln = cursor.getString(cursor.getColumnIndex(Lastname));
             String gender = cursor.getString(cursor.getColumnIndex(Gender));
-            data.add(new model(fn, ln, gender));
+            data.add(new Model(fn, ln, gender));
         }
         cursor.close();
         db.close();

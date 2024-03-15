@@ -1,10 +1,10 @@
 package com.example.database_demo;
 
-public class model{
+public class Model {
     String fname,lname,gender;
 
 
-    public model(String fname,String lname,String gender){
+    public Model(String fname, String lname, String gender){
         this.fname = fname;
         this.lname = lname;
         this.gender = gender;
