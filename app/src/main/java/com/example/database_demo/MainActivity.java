@@ -10,10 +10,8 @@ import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Toast;
@@ -38,48 +36,37 @@ public class MainActivity extends AppCompatActivity {
 
         addbtn = findViewById(R.id.Addbtn);
         listView = findViewById(R.id.listview);
+        m1 = new ArrayList<>();
+
         SearcheditTextfname = findViewById(R.id.search_edtfname);
         SearcheditTextlname = findViewById(R.id.search_edtlname);
         SearcheditTextgender = findViewById(R.id.search_edtgender);
 
+
         SearcheditTextfname.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                adapter.performFiler(s.toString(),1);
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                if (SearcheditTextlname.length() == 0 && SearcheditTextgender.length() == 0) {
-                    if (s.length() == 0) {
-                        updatelistview();
-                    }
-                }
-            }
+            public void afterTextChanged(Editable s) {}
         });
 
         SearcheditTextlname.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                adapter.performFiler(s.toString(),2);
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                if (SearcheditTextfname.length() == 0 && SearcheditTextgender.length() == 0) {
-                    if (s.length() == 0) {
-                        updatelistview();
-                    }
-                }
-            }
+            public void afterTextChanged(Editable s) {}
         });
 
         SearcheditTextgender.addTextChangedListener(new TextWatcher() {
@@ -89,22 +76,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                adapter.performFiler(s.toString(),3);
             }
-
             @Override
-            public void afterTextChanged(Editable s) {
-                if (SearcheditTextfname.length() == 0 && SearcheditTextlname.length() == 0) {
-                    if (s.length() == 0) {
-                        updatelistview();
-                    }
-                }
-            }
+            public void afterTextChanged(Editable s) {}
         });
-        m1 = new ArrayList<>();
-
-        adapter = new CustomListAdapter(this, m1);
-        listView.setAdapter(adapter);
 
         addbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(MainActivity.this, "Please Enter details..", Toast.LENGTH_SHORT).show();
                         } else {
                             db.Insertdata(fn, ln, s);
-                            updatelistview();
+                            Model model = new Model(adapter.getCount(),fn,ln,s);
+                            adapter.addData(model);
                             Toast.makeText(MainActivity.this, "Inserted", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -145,89 +122,14 @@ public class MainActivity extends AppCompatActivity {
                 builder.show();
             }
         });
-
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ImageView editimageview = view.findViewById(R.id.iv_edit);
-
-                editimageview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        //update data from database..
-                        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
-                        LayoutInflater inflater = getLayoutInflater();
-                        v = inflater.inflate(R.layout.activity_pupupaddbtn, null);
-                        final EditText firstname = v.findViewById(R.id.edtfirstname);
-                        final EditText lastname = v.findViewById(R.id.edtlastname);
-                        final RadioButton rbmale = v.findViewById(R.id.rbmale);
-                        builder.setView(v);
-                        Model Model = m1.get(position);
-                        firstname.setText(Model.getFname());
-                        lastname.setText(Model.getLname());
-                        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String fn = firstname.getText().toString();
-                                String ln = lastname.getText().toString();
-                                String name;
-                                if (rbmale.isChecked()) {
-                                    name = "male";
-                                } else name = "female";
-                                db.UpdateData(fn, ln, name);
-                                updatelistview();
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        builder.create();
-                        builder.show();
-                    }
-                });
-
-                //Delete data from database..
-                ImageView deleteimageview = view.findViewById(R.id.iv_delete);
-                deleteimageview.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.alertdialog));
-                        builder.setTitle("Are you sure you want to delete it..?");
-                        Model Model = m1.get(position);
-                        builder.setMessage(Model.getFname() + " " + Model.getLname());
-                        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String fn = Model.getFname();
-                                db.Deletedata(fn);
-                                updatelistview();
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                        builder.create();
-                        builder.show();
-                    }
-                });
-            }
-        });
         updatelistview();
     }
-
 
     public void updatelistview() {
         m1.clear();
         ArrayList<Model> data = db.Displaydata();
         m1.addAll(data);
-        adapter.notifyDataSetChanged();
+        adapter = new CustomListAdapter(this, m1, getLayoutInflater());
+        listView.setAdapter(adapter);
     }
 }

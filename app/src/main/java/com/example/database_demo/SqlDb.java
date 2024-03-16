@@ -63,12 +63,12 @@ public class SqlDb extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {Firstname, Lastname, Gender};
         Cursor cursor = db.query(Tablename, columns, null, null, null, null, null);
-
+        int id = 0;
         while (cursor.moveToNext()) {
             String fn = cursor.getString(cursor.getColumnIndex(Firstname));
             String ln = cursor.getString(cursor.getColumnIndex(Lastname));
             String gender = cursor.getString(cursor.getColumnIndex(Gender));
-            data.add(new Model(fn, ln, gender));
+            data.add(new Model(id++,fn, ln, gender));
         }
         cursor.close();
         db.close();
@@ -81,7 +81,6 @@ public class SqlDb extends SQLiteOpenHelper {
         db.delete(Tablename, "firstname = ?", new String[]{firstname});
         db.close();
     }
-
     public void UpdateData(String firstname, String lastname,String gender) {
         SQLiteDatabase sdb = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
